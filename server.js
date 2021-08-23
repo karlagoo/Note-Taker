@@ -1,9 +1,12 @@
 const express = require("express");
+const util =require('util');
 const path = require("path");
 const fs = require("fs");
 const { userInfo } = require("os");
 const { EWOULDBLOCK } = require("constants");
 const { v4: uuidv4 } = require('uuid');
+
+const writeFileAsync = util.promisify(fs.writeFile);
 
 const PORT = process.env.PORT || 3001;
 
@@ -44,10 +47,18 @@ app.post("/api/notes", (req, res) => {
 
     });
 });
-    app.delete("/api/notes/:id", (req, res) => {
-        res.end()
+app.delete("/api/notes/:id", (req, res) => {
+    id = req.params.id;
+    fs.readFile('./db/db.json', "utf8", (err, data) => {
+        let parsedData = [].concat(JSON.parse(data));
+        let updatedData = parsedData.filter(note => note.id !== id);
+        writeFileAsync('./db/db.json', JSON.stringify(updatedData)).then(response => {
+            res.send(`successfully deleted ${id}`);
+        }).catch(error => {
+            res.status(400).send({message: "error"})
+        });
     });
-
+});
 
 
     // Home Routes
