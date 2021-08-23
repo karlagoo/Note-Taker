@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const { userInfo } = require("os");
 const { EWOULDBLOCK } = require("constants");
+const { v4: uuidv4 } = require('uuid');
 
 const PORT = process.env.PORT || 3001;
 
@@ -24,6 +25,7 @@ app.get("/api/notes", (req, res) => {
 });
 
 app.post("/api/notes", (req, res) => {
+    let uuid = uuidv4()
     console.log(req.body);
 
     fs.readFile('./db/db.json', "utf8", (err, data) => {
@@ -32,7 +34,7 @@ app.post("/api/notes", (req, res) => {
 
         // add new note to noteData
         // id 
-        const newNoteData = noteData.concat([{ title: req.body.title, text: req.body.text }])
+        const newNoteData = noteData.concat([{ title: req.body.title, text: req.body.text, id: uuid}])
 
         // replaces with the new data
         fs.writeFile('./db/db.json', JSON.stringify(newNoteData), (err) => {
